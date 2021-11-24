@@ -85,9 +85,15 @@ public class ZoneTopologyListener extends UPnPEventAdapter {
 		for (Element property : event.getProperties()) {
 
 			if (property.getName().equals("ZoneGroupState")) {
-				List<Element> zoneGroups = property.getChild("ZoneGroups").getChildren("ZoneGroup");
+				Element zoneGroupStateElement = property.getChild("ZoneGroupState");
 
-				
+				List<Element> zoneGroups;
+				if (zoneGroupStateElement != null) {
+					zoneGroups = property.getChild("ZoneGroupState").getChild("ZoneGroups").getChildren("ZoneGroup");
+				} else {
+					zoneGroups = property.getChild("ZoneGroups").getChildren("ZoneGroup");
+				}
+
 				for (Element zoneGroup : zoneGroups) {
 					ArrayList<String> allDevicesInZone = new ArrayList<String>();
 					for (Element device : zoneGroup.getChildren("ZoneGroupMember")) {
