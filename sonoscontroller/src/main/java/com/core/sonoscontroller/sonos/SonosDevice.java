@@ -211,6 +211,15 @@ public class SonosDevice {
 		this.play();
 	}
 
+	/**
+	 * Play a given uri from list. Clear the queue.
+	 *
+	 * @param uri      URI of a stream to be played.
+	 * @param metadata The track metadata to show in the player (DIDL format).
+	 * @throws IOException              IOException during HTTP Client operation .
+	 *                                  Sending the command.
+	 * @throws SonosControllerException UPnP Error returned by the device
+	 */
 	public void playFromList(String uri, TrackMetadata metadata) throws IOException, SonosControllerException {
 		this.clearQueue();
 		String addQueue = this.addToQueue(uri, metadata);
