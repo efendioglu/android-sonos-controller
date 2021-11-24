@@ -7,13 +7,15 @@ public class TrackMetadata {
     private final String title;
     private final String creator;
     private final String albumArtist;
+    private final String uri;
     private final String album;
     private final String albumArtURI;
 
-    public TrackMetadata(String title, String creator, String albumArtist, String album, String albumArtURI) {
+    public TrackMetadata(String title, String creator, String albumArtist, String uri, String album, String albumArtURI) {
         this.title = title;
         this.creator = creator;
         this.albumArtist = albumArtist;
+        this.uri = uri;
         this.album = album;
         this.albumArtURI = albumArtURI;
     }
@@ -23,6 +25,7 @@ public class TrackMetadata {
                 ParserHelper.findOne("<dc:title>(.*)</dc:title>", metadata),
                 ParserHelper.findOne("<dc:creator>(.*)</dc:creator>", metadata),
                 ParserHelper.findOne("<r:albumArtist>(.*)</r:albumArtist>", metadata),
+				ParserHelper.findOne("<res .+?>(.*)</res>", metadata),
                 ParserHelper.findOne("<upnp:album>(.*)</upnp:album>", metadata),
                 ParserHelper.findOne("<upnp:albumArtURI>(.*)</upnp:albumArtURI>", metadata)
         );
@@ -40,7 +43,11 @@ public class TrackMetadata {
         return albumArtist;
     }
 
-    public String getAlbum() {
+	public String getUri() {
+		return uri;
+	}
+
+	public String getAlbum() {
         return album;
     }
 
@@ -54,6 +61,7 @@ public class TrackMetadata {
                 "title='" + title + '\'' +
                 ", creator='" + creator + '\'' +
                 ", albumArtist='" + albumArtist + '\'' +
+				", uri='" + uri + '\'' +
                 ", album='" + album + '\'' +
                 ", albumArtURI='" + albumArtURI + '\'' +
                 '}';
@@ -77,6 +85,7 @@ public class TrackMetadata {
 		int result = 1;
 		result = prime * result + ((album == null) ? 0 : album.hashCode());
 		result = prime * result + ((albumArtURI == null) ? 0 : albumArtURI.hashCode());
+		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
 		result = prime * result + ((albumArtist == null) ? 0 : albumArtist.hashCode());
 		result = prime * result + ((creator == null) ? 0 : creator.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
@@ -116,6 +125,11 @@ public class TrackMetadata {
 			if (other.title != null)
 				return false;
 		} else if (!title.equals(other.title))
+			return false;
+		if (uri == null) {
+			if (other.uri != null)
+				return false;
+		} else if (!uri.equals(other.uri))
 			return false;
 		return true;
 	}

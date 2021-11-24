@@ -1,5 +1,6 @@
 package com.core.sonoscontroller.ui.playlist.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,7 +43,8 @@ class PlaylistAdapter(val device: SonosDevice, var tracks: List<TrackMetadata>):
             CoroutineScope(Dispatchers.IO).launch {
                 val trackInfo = device.currentTrackInfo
                 val playState = device.playState
-                if (playState == PlayState.PLAYING && trackInfo.metadata.equals(track)) {
+
+                if (playState == PlayState.PLAYING && track.uri == trackInfo.metadata.uri) {
                     binding.playButton.setImageResource(android.R.drawable.ic_media_pause)
                 } else {
                     binding.playButton.setImageResource(android.R.drawable.ic_media_play)
@@ -53,10 +55,10 @@ class PlaylistAdapter(val device: SonosDevice, var tracks: List<TrackMetadata>):
                 CoroutineScope(Dispatchers.IO).launch {
                     val playState = device.playState
                     val trackInfo = device.currentTrackInfo
-                    if (playState == PlayState.PLAYING && trackInfo.metadata.equals(track)) {
+                    if (playState == PlayState.PLAYING && track.uri == trackInfo.metadata.uri) {
                         device.pause()
                     } else {
-                        device.playFromQueue(adapterPosition + 1)
+                        device.playUri(track.uri, track)
                     }
                 }
             }
