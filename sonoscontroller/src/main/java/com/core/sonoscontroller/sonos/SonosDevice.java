@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 /**
  * @author vmichalak
  * @author Kilian
+ * @author efendioglu
  *
  */
 @SuppressWarnings("unused")
@@ -210,6 +211,19 @@ public class SonosDevice {
 		this.play();
 	}
 
+	public void playFromList(String uri, TrackMetadata metadata) throws IOException, SonosControllerException {
+		this.clearQueue();
+		String addQueue = this.addToQueue(uri, metadata);
+
+		String firstTrackNumberEnqueued = ParserHelper.findOne("<FirstTrackNumberEnqueued>(.*)</FirstTrackNumberEnqueued>", addQueue);
+		String macAddress = getSpeakerInfo().getMacAddress();
+
+		playUri("x-rincon-queue:" + this.getSpeakerInfo().getLocalUID() + "#0", metadata);
+
+		CommandBuilder.transport("Seek").put("InstanceID", "0").put("Unit", "TRACK_NR")
+				.put("Target", firstTrackNumberEnqueued).executeOn(this.ip);
+	}
+
 	/**
 	 * Pause current music, Play URI and resume (very useful for announcement). clip
 	 * is a blocking method. Take care !
@@ -332,12 +346,12 @@ public class SonosDevice {
 	 *                                  Sending the command.
 	 * @throws SonosControllerException UPnP Error returned by the device
 	 */
-	public void addToQueue(String uri, TrackMetadata metadata) throws IOException, SonosControllerException {
+	public String addToQueue(String uri, TrackMetadata metadata) throws IOException, SonosControllerException {
 		String metadataString = "";
 		if (metadata != null) {
 			metadataString = metadata.toDIDL();
 		}
-		CommandBuilder.transport("AddURIToQueue").put("InstanceID", "0").put("EnqueuedURI", uri)
+		return CommandBuilder.transport("AddURIToQueue").put("InstanceID", "0").put("EnqueuedURI", uri)
 				.put("EnqueuedURIMetaData", metadataString).put("DesiredFirstTrackNumberEnqueued", "0")
 				.put("EnqueueAsNext", "1").executeOn(this.ip);
 	}
@@ -884,6 +898,24 @@ public class SonosDevice {
 				.put("StartingIndex", String.valueOf(startingIndex))
 				.put("RequestedCount", String.valueOf(requestedCount)).put("SortCriteria", "").executeOn(this.ip);
 		List<String> itemsNonParsed = ParserHelper.findAll("<item .+?(?=>)>(.+?(?=</item>))", r);
+		List<TrackMetadata> itemsParsed = new ArrayList<TrackMetadata>();
+		for (String s : itemsNonParsed) {
+			itemsParsed.add(TrackMetadata.parse(s));
+		}
+		return itemsParsed;
+	}
+
+	public List<TrackMetadata> getPlaylist(int startingIndex, int requestedCount)
+			throws IOException, SonosControllerException {
+		String r = CommandBuilder.contentDirectory("Browse")
+				.put("ObjectID", "SQ:")
+				.put("BrowseFlag", "BrowseDirectChildren")
+				.put("Filter", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI")
+				.put("StartingIndex", String.valueOf(startingIndex))
+				.put("RequestedCount", String.valueOf(requestedCount))
+				.put("SortCriteria", "")
+				.executeOn(this.ip);
+		List<String> itemsNonParsed = ParserHelper.findAll("<container .+?(?=>)>(.+?(?=</container>))", r);
 		List<TrackMetadata> itemsParsed = new ArrayList<TrackMetadata>();
 		for (String s : itemsNonParsed) {
 			itemsParsed.add(TrackMetadata.parse(s));

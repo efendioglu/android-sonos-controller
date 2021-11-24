@@ -58,7 +58,7 @@ class PlaylistAdapter(val device: SonosDevice, var tracks: List<TrackMetadata>):
                     if (playState == PlayState.PLAYING && track.uri == trackInfo.metadata.uri) {
                         device.pause()
                     } else {
-                        device.playUri(track.uri, track)
+                        device.playFromList(track.uri, track)
                     }
                 }
             }

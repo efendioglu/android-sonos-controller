@@ -18,7 +18,7 @@ class PlaylistViewModel : ViewModel() {
     fun getPlaylist(device: SonosDevice) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val playlist = device.getQueue(0, 50)
+                val playlist = device.getPlaylist(0, 50)
                 playlistLiveData.postValue(playlist)
             }
         }
