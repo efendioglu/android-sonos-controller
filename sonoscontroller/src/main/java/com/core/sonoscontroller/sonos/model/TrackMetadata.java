@@ -10,14 +10,16 @@ public class TrackMetadata {
     private final String uri;
     private final String album;
     private final String albumArtURI;
+    private final String desc;
 
-    public TrackMetadata(String title, String creator, String albumArtist, String uri, String album, String albumArtURI) {
+    public TrackMetadata(String title, String creator, String albumArtist, String uri, String album, String albumArtURI, String desc) {
         this.title = title;
         this.creator = creator;
         this.albumArtist = albumArtist;
         this.uri = uri;
         this.album = album;
         this.albumArtURI = albumArtURI;
+        this.desc = desc;
     }
 
     public static TrackMetadata parse(String metadata) {
@@ -27,7 +29,8 @@ public class TrackMetadata {
                 ParserHelper.findOne("<r:albumArtist>(.*)</r:albumArtist>", metadata),
 				ParserHelper.findOne("<res .+?>(.*)</res>", metadata),
                 ParserHelper.findOne("<upnp:album>(.*)</upnp:album>", metadata),
-                ParserHelper.findOne("<upnp:albumArtURI>(.*)</upnp:albumArtURI>", metadata)
+                ParserHelper.findOne("<upnp:albumArtURI>(.*)</upnp:albumArtURI>", metadata),
+				ParserHelper.findOne("<desc .+?>(.*)</desc>", metadata)
         );
     }
 
@@ -66,7 +69,13 @@ public class TrackMetadata {
                 ", albumArtURI='" + albumArtURI + '\'' +
                 '}';
     }
-
+    		  //<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+			  // 	<item id="100e206cspotify%3aartistTopTracks%3a3eVuump9qyK0YCQQo4mKbc" parentID="10052064spotify%3aartist%3a3eVuump9qyK0YCQQo4mKbc" restricted="true">
+			  // 		<dc:title>Top Tracks</dc:title>
+			  // 		<upnp:class>object.container.playlistContainer</upnp:class>
+			  // 		<desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON2311_X_#Svc2311-0-Token</desc>
+			  // 	</item>
+			  // </DIDL-Lite>
     public String toDIDL() {
         return "<DIDL-Lite xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\" xmlns:r=\"urn:schemas-rinconnetworks-com:metadata-1-0/\" xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\">" +
                     "<item>" +

@@ -360,6 +360,7 @@ public class SonosDevice {
 		if (metadata != null) {
 			metadataString = metadata.toDIDL();
 		}
+
 		return CommandBuilder.transport("AddURIToQueue").put("InstanceID", "0").put("EnqueuedURI", uri)
 				.put("EnqueuedURIMetaData", metadataString).put("DesiredFirstTrackNumberEnqueued", "0")
 				.put("EnqueueAsNext", "1").executeOn(this.ip);
@@ -925,6 +926,24 @@ public class SonosDevice {
 				.put("SortCriteria", "")
 				.executeOn(this.ip);
 		List<String> itemsNonParsed = ParserHelper.findAll("<container .+?(?=>)>(.+?(?=</container>))", r);
+		List<TrackMetadata> itemsParsed = new ArrayList<TrackMetadata>();
+		for (String s : itemsNonParsed) {
+			itemsParsed.add(TrackMetadata.parse(s));
+		}
+		return itemsParsed;
+	}
+
+	public List<TrackMetadata> getFavorites(int startingIndex, int requestedCount)
+			throws IOException, SonosControllerException {
+		String r = CommandBuilder.contentDirectory("Browse")
+				.put("ObjectID", "FV:2")
+				.put("BrowseFlag", "BrowseDirectChildren")
+				.put("Filter", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI")
+				.put("StartingIndex", String.valueOf(startingIndex))
+				.put("RequestedCount", String.valueOf(requestedCount))
+				.put("SortCriteria", "")
+				.executeOn(this.ip);
+		List<String> itemsNonParsed = ParserHelper.findAll("<item id=\"FV.+?>(.+?(?=<r:resMD>))", r);
 		List<TrackMetadata> itemsParsed = new ArrayList<TrackMetadata>();
 		for (String s : itemsNonParsed) {
 			itemsParsed.add(TrackMetadata.parse(s));
